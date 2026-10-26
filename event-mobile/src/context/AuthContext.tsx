@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
-import { api } from "@/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { api } from "../services/api";
 
 type Usuario = { id: string; name: string; email: string; role: string };
 
@@ -15,6 +15,7 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
+// hook para qualquer tela pegar user, token, login...
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -22,21 +23,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  // ao abrir o app, tenta recuperar o login salvo no celular
+  // Ao abrir o app: se tem sessão salva, o usuário continua logado.
   useEffect(() => {
-    Promise.all([SecureStore.getItemAsync("token"), SecureStore.getItemAsync("user")])
-      .then(([t, u]) => {
-        if (t && u) {
-          setToken(t);
-          setUser(JSON.parse(u));
+    AsyncStorage.getItem("sessao")
+      .then((salva) => {
+        if (salva) {
+          const dados = JSON.parse(salva);
+          setToken(dados.token);
+          setUser(dados.user);
         }
       })
       .finally(() => setCarregando(false));
   }, []);
 
+  // guarda na memória (estado) e no armazenamento do aparelho
   async function salvarSessao(dados: { token: string; user: Usuario }) {
-    await SecureStore.setItemAsync("token", dados.token);
-    await SecureStore.setItemAsync("user", JSON.stringify(dados.user));
+    await AsyncStorage.setItem("sessao", JSON.stringify(dados));
     setToken(dados.token);
     setUser(dados.user);
   }
@@ -47,16 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function register(name: string, email: string, password: string) {
-    const dados = await api("/api/auth/register", {
-      method: "POST",
-      body: { name, email, password },
-    });
-    await salvarSessao(dados);
+    const dados = await api("/api/auth/register", { method: "POST", body: { name, email, password } });
+    await salvarSessao(dados); // cadastrou? já entra logado
   }
 
   async function logout() {
-    await SecureStore.deleteItemAsync("token");
-    await SecureStore.deleteItemAsync("user");
+    await AsyncStorage.removeItem("sessao");
     setToken(null);
     setUser(null);
   }

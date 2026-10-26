@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
-import { api, formatarData, Inscricao } from "@/services/api";
-import { estilos } from "@/styles";
+import { useAuth } from "../../context/AuthContext";
+import { api, formatarData, Inscricao } from "../../services/api";
+import { estilos } from "../../styles";
 
 export default function MinhasInscricoes() {
   const { token } = useAuth();
@@ -11,39 +11,32 @@ export default function MinhasInscricoes() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  const carregar = useCallback(async () => {
+  async function carregar() {
     setErro("");
     setCarregando(true);
     try {
-      setLista(await api("/api/registrations", { token }));
+      setLista(await api("/api/registrations", { token })); // já vem com o evento dentro
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao carregar as inscrições");
     } finally {
       setCarregando(false);
     }
-  }, [token]);
+  }
 
-  // recarrega toda vez que a aba aparece (pra mostrar inscrições feitas nos detalhes)
+  // recarrega ao abrir a aba (mostra inscrições feitas na tela de detalhes)
   useFocusEffect(
     useCallback(() => {
       carregar();
-    }, [carregar])
+    }, [token])
   );
 
   async function cancelar(id: string) {
     try {
       await api(`/api/registrations/${id}`, { method: "DELETE", token });
-      setLista((atual) => atual.filter((i) => i.id !== id));
+      setLista((atual) => atual.filter((i) => i.id !== id)); // tira da tela sem recarregar
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao cancelar");
     }
-  }
-
-  function confirmarCancelamento(id: string) {
-    Alert.alert("Cancelar inscrição", "Deseja mesmo cancelar essa inscrição?", [
-      { text: "Não", style: "cancel" },
-      { text: "Sim, cancelar", style: "destructive", onPress: () => cancelar(id) },
-    ]);
   }
 
   if (carregando && lista.length === 0) {
@@ -79,7 +72,7 @@ export default function MinhasInscricoes() {
               {formatarData(item.event.date)} às {item.event.time}
             </Text>
             <Text style={s.info}>{item.event.location}</Text>
-            <Pressable onPress={() => confirmarCancelamento(item.id)}>
+            <Pressable onPress={() => cancelar(item.id)}>
               <Text style={s.cancelar}>Cancelar inscrição</Text>
             </Pressable>
           </View>

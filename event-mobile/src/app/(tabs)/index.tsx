@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
-import { api, Evento, formatarData } from "@/services/api";
-import { estilos } from "@/styles";
+import { api, Evento, formatarData } from "../../services/api";
+import { estilos } from "../../styles";
 
 export default function Eventos() {
   const router = useRouter();
@@ -10,29 +10,31 @@ export default function Eventos() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  const carregar = useCallback(async () => {
+  async function carregar() {
     setErro("");
     setCarregando(true);
     try {
-      setEventos(await api("/api/events"));
+      setEventos(await api("/api/events")); // GET /api/events
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao carregar os eventos");
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }
 
-  // carrega toda vez que a aba aparece
+  // roda toda vez que a aba aparece na tela
   useFocusEffect(
     useCallback(() => {
       carregar();
-    }, [carregar])
+    }, [])
   );
 
+  // 1ª carga: só o círculo girando
   if (carregando && eventos.length === 0) {
     return <ActivityIndicator style={{ flex: 1 }} size="large" />;
   }
 
+  // falhou e não tem nada para mostrar: mensagem + botão de tentar de novo
   if (erro && eventos.length === 0) {
     return (
       <View style={estilos.centro}>
@@ -49,9 +51,8 @@ export default function Eventos() {
       data={eventos}
       keyExtractor={(item) => item.id}
       contentContainerStyle={{ padding: 16, gap: 12 }}
-      refreshing={carregando}
+      refreshing={carregando} // puxar a lista para baixo recarrega
       onRefresh={carregar}
-      ListHeaderComponent={erro ? <Text style={estilos.erro}>{erro}</Text> : undefined}
       ListEmptyComponent={<Text style={{ textAlign: "center" }}>Nenhum evento disponível.</Text>}
       renderItem={({ item }) => (
         <Pressable

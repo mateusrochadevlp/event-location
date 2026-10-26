@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { Link } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
-import { estilos } from "@/styles";
+import { useAuth } from "../context/AuthContext";
+import { estilos } from "../styles";
 
 export default function Login() {
   const { login } = useAuth();
@@ -15,7 +15,8 @@ export default function Login() {
     setErro("");
     setCarregando(true);
     try {
-      await login(email.trim(), senha); // logou? o layout troca de tela sozinho
+      await login(email.trim(), senha);
+      // sem navegar manualmente: ao salvar o token, o _layout troca de tela sozinho
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao entrar");
     } finally {
@@ -45,16 +46,8 @@ export default function Login() {
 
       {erro ? <Text style={estilos.erro}>{erro}</Text> : null}
 
-      <Pressable
-        style={[estilos.botao, carregando && estilos.botaoDesativado]}
-        onPress={entrar}
-        disabled={carregando}
-      >
-        {carregando ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={estilos.botaoTexto}>Entrar</Text>
-        )}
+      <Pressable style={estilos.botao} onPress={entrar} disabled={carregando}>
+        {carregando ? <ActivityIndicator color="#fff" /> : <Text style={estilos.botaoTexto}>Entrar</Text>}
       </Pressable>
 
       <Link href="/register" style={estilos.link}>

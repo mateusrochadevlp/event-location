@@ -1,11 +1,11 @@
 import { Pressable, Text } from "react-native";
 import { Tabs } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 export default function TabsLayout() {
   const { logout } = useAuth();
 
-  // botão de logout no cabeçalho das duas abas
+  // botão "Sair" no canto do cabeçalho das duas abas
   const botaoSair = () => (
     <Pressable onPress={logout} style={{ marginRight: 16 }}>
       <Text style={{ color: "#dc2626", fontWeight: "600" }}>Sair</Text>

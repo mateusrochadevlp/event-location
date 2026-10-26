@@ -1,56 +1,37 @@
-# Welcome to your Expo app 👋
+# Plataforma de Eventos - App Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo feito com React Native + Expo (Expo Router). Permite criar conta, fazer login, ver eventos, se inscrever e cancelar inscrições. Consome a API do projeto Next.js (`event-location`).
 
-## Get started
+## Como rodar
 
-1. Install dependencies
+1. Deixe a API rodando (projeto `event-location`, com o Docker ligado):
+
+   ```bash
+   npm run dev
+   ```
+
+2. Neste projeto, instale as dependências e inicie o app:
 
    ```bash
    npm install
-   ```
-
-2. Start the app
-
-   ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. Abra o app:
+   - **Celular**: instale o [Expo Go](https://expo.dev/go) e escaneie o QR code. O celular e o PC precisam estar na mesma rede Wi-Fi.
+   - **Navegador**: aperte `w` no terminal.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## URL da API
 
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+O app descobre o IP do PC automaticamente e usa a porta 3000. Para usar outro endereço:
 
 ```bash
-npm run reset-project
+# PowerShell
+$env:EXPO_PUBLIC_API_URL="http://SEU_IP:3000"; npx expo start -c
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+## Observações
 
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- No navegador, a API precisa liberar CORS (já configurado no `next.config.ts` do `event-location`).
+- Se o celular não conectar, libere a porta 3000 no firewall do Windows (rede privada).
+- O código do app fica em `src/app` (telas), `src/context` (autenticação) e `src/services` (chamadas à API).
